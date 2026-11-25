@@ -1,5 +1,4 @@
 
-package com.mycompany.employeemanagementsystem;
 
 import java.io.Serializable;
 import java.util.Objects;
