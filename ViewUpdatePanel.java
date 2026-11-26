@@ -1,6 +1,5 @@
 
 
-
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
 import javax.swing.*;
@@ -361,7 +360,115 @@ private void showError(String message) {
         JOptionPane.ERROR_MESSAGE
     );
 }
+private int parsePositiveInt(String text, String fieldName) {
+    if (text == null || text.trim().isEmpty()) {
+        throw new IllegalArgumentException(fieldName + " is required.");
+    }
+    int val;
+    try {
+        val = Integer.parseInt(text.trim());
+    } catch (NumberFormatException e) {
+        throw new IllegalArgumentException(fieldName + " must be a valid integer.");
+    }
+    if (val <= 0) {
+        throw new IllegalArgumentException(fieldName + " must be a positive integer.");
+    }
+    return val;
+}
 
+private double parseNonNegative(String text, String fieldName) {
+    if (text == null || text.trim().isEmpty()) {
+        throw new IllegalArgumentException(fieldName + " is required.");
+    }
+    double val;
+    try {
+        val = Double.parseDouble(text.trim());
+    } catch (NumberFormatException e) {
+        throw new IllegalArgumentException(fieldName + " must be a valid number.");
+    }
+    if (Double.isNaN(val) || Double.isInfinite(val) || val < 0) {
+        throw new IllegalArgumentException(fieldName + " must be a non-negative number.");
+    }
+    return val;
+}
+
+private Department findDepartment(String name) {
+    for (Department d : manager.getDepartments()) {
+        if (d.getDepartmentName().equals(name)) {
+            return d;
+        }
+    }
+    return null;
+}
+
+private void handleUpdateEmployee() {
+    if (selectedOriginalId == -1) {
+        showError("Please select an employee from the table first.");
+        return;
+    }
+    Employee emp = manager.searchById(selectedOriginalId);
+    if (emp == null) {
+        showError("The selected employee no longer exists.");
+        refreshData();
+        return;
+    }
+
+    try {
+        // 1) Validate EVERYTHING before touching the employee object.
+        String name = nameField.getText().trim();
+        String position = positionField.getText().trim();
+        if (name.isEmpty() || position.isEmpty()) {
+            throw new IllegalArgumentException("Name and Position are required.");
+        }
+        int newId = parsePositiveInt(idField.getText(), "Employee ID");
+        int age = parsePositiveInt(ageField.getText(), "Age");
+
+        Employee other = manager.searchById(newId);
+        if (other != null && other != emp) {
+            throw new IllegalArgumentException("Employee ID " + newId + " already exists.");
+        }
+
+        Department dept = findDepartment((String) deptComboBox.getSelectedItem());
+        if (dept == null) {
+            throw new IllegalArgumentException("Please select a valid department.");
+        }
+
+        double pay1, pay2;
+        if (isPartTimeSelected) {
+            pay1 = parseNonNegative(hourlyRateField.getText(), "Hourly Rate");
+            pay2 = parseNonNegative(hoursWorkedField.getText(), "Hours Worked");
+        } else {
+            pay1 = parseNonNegative(basicSalaryField.getText(), "Basic Salary");
+            pay2 = parseNonNegative(bonusField.getText(), "Bonus");
+        }
+
+        // 2) Everything is valid: apply the changes to the same object.
+        emp.setEmployeeId(newId);
+        emp.setFullName(name);
+        emp.setAge(age);
+        emp.setPosition(position);
+        emp.setDepartment(dept);
+        if (emp instanceof PartTimeEmployee) {
+            ((PartTimeEmployee) emp).setHourlyRate(pay1);
+            ((PartTimeEmployee) emp).setHoursWorked(pay2);
+        } else if (emp instanceof FullTimeEmployee) {
+            ((FullTimeEmployee) emp).setBasicSalary(pay1);
+            ((FullTimeEmployee) emp).setBonus(pay2);
+        }
+
+        // 3) Save.
+        if (manager.updateEmployee(emp)) {
+            selectedOriginalId = newId;
+            refreshData();
+            JOptionPane.showMessageDialog(this, "Employee updated successfully!");
+        } else {
+            refreshData();
+            showError("The employee could not be updated (the data file could not be saved).");
+        }
+    } catch (IllegalArgumentException ex) {
+        showError(ex.getMessage());
+    }
+}
 public void refreshData() {
     int previouslySelectedId = selectedOriginalId;
 
