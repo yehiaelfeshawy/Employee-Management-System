@@ -1,5 +1,6 @@
-
-package com.mycompany.employeemanagementsystem;
+package EmployeeManagementSystem.gui;
+import EmployeeManagementSystem.model.*;
+import EmployeeManagementSystem.service.*;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
