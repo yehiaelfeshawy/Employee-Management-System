@@ -1,8 +1,5 @@
-package EmployeeManagementSystem.gui;
-import EmployeeManagementSystem.model.*;
-import EmployeeManagementSystem.service.EmployeeManager;
 
-
+package com.mycompany.employeemanagementsystem;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
@@ -23,6 +20,12 @@ public class ViewUpdatePanel extends javax.swing.JPanel {
         this.mainFrame = mainFrame;
 
         initComponents();
+
+        positionField.setColumns(25);
+        basicSalaryField.setColumns(25);
+        bonusField.setColumns(25);
+        hourlyRateField.setColumns(25);
+        hoursWorkedField.setColumns(25);
 
         tableModel = new DefaultTableModel(
             new Object[]{"ID", "Full Name", "Age", "Department",
@@ -240,6 +243,7 @@ refreshData();
                 .addGap(18, 18, 18))
         );
     }// </editor-fold>//GEN-END:initComponents
+
     private void hourlyRateFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hourlyRateFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_hourlyRateFieldActionPerformed
@@ -363,7 +367,6 @@ private void showError(String message) {
         JOptionPane.ERROR_MESSAGE
     );
 }
-
 private int parsePositiveInt(String text, String fieldName) {
     if (text == null || text.trim().isEmpty()) {
         throw new IllegalArgumentException(fieldName + " is required.");
@@ -473,7 +476,6 @@ private void handleUpdateEmployee() {
         showError(ex.getMessage());
     }
 }
-
 public void refreshData() {
     int previouslySelectedId = selectedOriginalId;
 
